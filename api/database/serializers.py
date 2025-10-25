@@ -34,6 +34,7 @@ class BroadcastSerializer(serializers.ModelSerializer):
     views_count = serializers.IntegerField(read_only=True)
     has_liked = serializers.SerializerMethodField()
     time_since = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
     
     class Meta:
         model = Broadcast
@@ -58,6 +59,9 @@ class BroadcastSerializer(serializers.ModelSerializer):
         from django.utils.timesince import timesince
         
         return timesince(obj.created_at, timezone.now())
+    
+    def get_tags(self, obj):
+        return obj.get_tags()
 
 class BroadcastDetailSerializer(BroadcastSerializer):
     comments = serializers.SerializerMethodField()
@@ -68,7 +72,7 @@ class BroadcastDetailSerializer(BroadcastSerializer):
     def get_comments(self, obj):
         comments = BroadcastComment.objects.filter(
             broadcast=obj, parent_comment__isnull=True
-        ).order_by('-created_at')[:10]  # 只获取前10条顶级评论
+        ).order_by('-created_at')[:10]
         return CommentSerializer(comments, many=True).data
 
 class BroadcastCreateSerializer(serializers.ModelSerializer):
@@ -88,6 +92,11 @@ class BroadcastCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("内容至少需要10个字符")
         if len(value) > 5000:
             raise serializers.ValidationError("内容不能超过5000个字符")
+        return value
+    
+    def validate_tags(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("标签必须是列表格式")
         return value
 
 class BroadcastLikeSerializer(serializers.ModelSerializer):

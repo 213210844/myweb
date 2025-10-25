@@ -1,72 +1,124 @@
 import { useState, useEffect } from 'react';
-import { useBroadcastContext } from '../contexts/BroadcastContext';
-import { mockBroadcasts } from '../data/mockBroadcasts';
-import { filterBroadcasts, sortBroadcasts } from '../utils/broadcastUtils';
+import { broadcastAPI } from '../services/api';
 
 export const useBroadcast = () => {
-    const { state, dispatch } = useBroadcastContext();
-    const [searchTerm, setSearchTerm] = useState('');
+  const [broadcasts, setBroadcasts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({
+    type: 'all',
+    sort: 'newest',
+    search: '',
+  });
 
-    // 初始化模拟数据
-    useEffect(() => {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        setTimeout(() => {
-            dispatch({ type: 'SET_BROADCASTS', payload: mockBroadcasts });
-            dispatch({ type: 'SET_LOADING', payload: false });
-        }, 1000);
-    }, [dispatch]);
+  // 获取广播列表
+  const fetchBroadcasts = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const params = {};
+      if (filters.type !== 'all') {
+        params.type = filters.type;
+      }
+      if (filters.search) {
+        params.search = filters.search;
+      }
+      params.sort = filters.sort;
+      
+      const response = await broadcastAPI.getBroadcasts(params);
+      setBroadcasts(response.data.results || response.data);
+    } catch (err) {
+      setError('获取广播列表失败');
+      console.error('Error fetching broadcasts:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // 添加新广播
-    const addBroadcast = (broadcastData) => {
-        const newBroadcast = {
-            id: Date.now().toString(),
-            ...broadcastData,
-            timestamp: new Date().toISOString(),
-            likes: 0,
-            comments: 0,
-            views: 0
-        };
-        dispatch({ type: 'ADD_BROADCAST', payload: newBroadcast });
-    };
+  // 创建新广播
+  const createBroadcast = async (broadcastData) => {
+    try {
+      const response = await broadcastAPI.createBroadcast(broadcastData);
+      setBroadcasts(prev => [response.data, ...prev]);
+      return { success: true, data: response.data };
+    } catch (err) {
+      const errorMsg = err.response?.data || { non_field_errors: ['创建失败'] };
+      return { success: false, error: errorMsg };
+    }
+  };
 
-    // 更新广播
-    const updateBroadcast = (id, updates) => {
-        const updatedBroadcast = { ...state.broadcasts.find(b => b.id === id), ...updates };
-        dispatch({ type: 'UPDATE_BROADCAST', payload: updatedBroadcast });
-    };
+  // 点赞广播
+  const likeBroadcast = async (broadcastId) => {
+    try {
+      const response = await broadcastAPI.likeBroadcast(broadcastId);
+      
+      // 更新本地状态
+      setBroadcasts(prev => 
+        prev.map(broadcast => 
+          broadcast.id === broadcastId 
+            ? { ...broadcast, likes_count: response.data.likes_count, has_liked: !broadcast.has_liked }
+            : broadcast
+        )
+      );
+      
+      return { success: true, data: response.data };
+    } catch (err) {
+      return { success: false, error: '点赞失败' };
+    }
+  };
 
-    // 删除广播
-    const deleteBroadcast = (id) => {
-        dispatch({ type: 'DELETE_BROADCAST', payload: id });
-    };
+  // 添加评论
+  const addComment = async (broadcastId, commentData) => {
+    try {
+      const response = await broadcastAPI.addComment(broadcastId, commentData);
+      
+      // 更新评论计数
+      setBroadcasts(prev =>
+        prev.map(broadcast =>
+          broadcast.id === broadcastId
+            ? { ...broadcast, comments_count: broadcast.comments_count + 1 }
+            : broadcast
+        )
+      );
+      
+      return { success: true, data: response.data };
+    } catch (err) {
+      return { success: false, error: '评论失败' };
+    }
+  };
 
-    // 点赞广播
-    const likeBroadcast = (id) => {
-        const broadcast = state.broadcasts.find(b => b.id === id);
-        if (broadcast) {
-            updateBroadcast(id, { likes: broadcast.likes + 1 });
-        }
-    };
+  // 删除广播
+  const deleteBroadcast = async (broadcastId) => {
+    try {
+      await broadcastAPI.deleteBroadcast(broadcastId);
+      setBroadcasts(prev => prev.filter(broadcast => broadcast.id !== broadcastId));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: '删除失败' };
+    }
+  };
 
-    // 过滤和排序后的广播列表
-    const filteredBroadcasts = filterBroadcasts(
-        sortBroadcasts(state.broadcasts, state.sort),
-        state.filter,
-        searchTerm
-    );
+  // 更新筛选条件
+  const updateFilters = (newFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
 
-    return {
-        broadcasts: filteredBroadcasts,
-        loading: state.loading,
-        filter: state.filter,
-        sort: state.sort,
-        searchTerm,
-        setSearchTerm,
-        addBroadcast,
-        updateBroadcast,
-        deleteBroadcast,
-        likeBroadcast,
-        setFilter: (filter) => dispatch({ type: 'SET_FILTER', payload: filter }),
-        setSort: (sort) => dispatch({ type: 'SET_SORT', payload: sort })
-    };
+  // 当筛选条件变化时重新获取数据
+  useEffect(() => {
+    fetchBroadcasts();
+  }, [filters]);
+
+  return {
+    broadcasts,
+    loading,
+    error,
+    filters,
+    fetchBroadcasts,
+    createBroadcast,
+    likeBroadcast,
+    addComment,
+    deleteBroadcast,
+    updateFilters,
+  };
 };

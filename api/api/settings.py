@@ -25,11 +25,12 @@ SECRET_KEY = 'django-insecure-a%!1yk!!!sqnd4h53^)7soyvhijrwc0i&-q%mkck88dafnp0ls
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
+# 在INSTALLED_APPS中确保有corsheaders
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,13 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 第三方应用
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'channels',
+    # 本地应用
     'database',
 ]
 
+# REST Framework配置
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -55,17 +58,37 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20
 }
+# CORS配置 - 允许所有来源（开发环境）
+CORS_ALLOW_ALL_ORIGINS = True  # 开发环境使用，生产环境应该限制
 
-# CORS配置
+# 或者指定允许的源（推荐）
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React开发服务器
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", 
+    "http://192.168.118.128:3000",
+    "http://192.168.118.128:8000",
 ]
 
-# Channels配置
-ASGI_APPLICATION = 'api.asgi.application'
+# 允许携带凭证（cookies、认证头等）
+CORS_ALLOW_CREDENTIALS = True
+
+# 允许的请求头
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 
+# 中间件顺序很重要
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # 必须放在最前面
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

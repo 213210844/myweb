@@ -1,42 +1,44 @@
 import React, { useState } from 'react';
-import { useBroadcast } from '../../hooks/useBroadcast';
-import { validateBroadcast } from '../../utils/broadcastUtils';
 import styles from './broadcastForm.module.css';
 
-const BroadcastForm = ({ onClose }) => {
-    const { addBroadcast } = useBroadcast();
+const BroadcastForm = ({ onSubmit, onClose }) => {
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        type: 'general',
+        broadcast_type: 'general',
         priority: 'medium',
-        tags: ''
+        tags: []
     });
     const [errors, setErrors] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+        e.preventDefault(); // 重要：阻止表单默认提交行为
+        console.log('表单提交被触发', formData); // 添加调试日志
         
-        const validationErrors = validateBroadcast(formData);
-        if (validationErrors.length > 0) {
-            setErrors(validationErrors);
+        setIsSubmitting(true);
+        setErrors([]);
+
+        // 基本验证
+        if (!formData.title.trim()) {
+            setErrors(['标题不能为空']);
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!formData.content.trim()) {
+            setErrors(['内容不能为空']);
             setIsSubmitting(false);
             return;
         }
 
         try {
-            await addBroadcast({
-                ...formData,
-                tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-            });
-            
-            setFormData({ title: '', content: '', type: 'general', priority: 'medium', tags: '' });
-            setErrors([]);
-            onClose?.();
+            console.log('准备调用onSubmit', formData);
+            await onSubmit(formData);
+            console.log('onSubmit调用完成');
         } catch (error) {
-            setErrors(['发布失败，请重试']);
+            console.error('提交错误:', error);
+            setErrors(['提交失败，请重试']);
         } finally {
             setIsSubmitting(false);
         }
@@ -44,11 +46,21 @@ const BroadcastForm = ({ onClose }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        // 清除错误
-        if (errors.length > 0) {
-            setErrors([]);
-        }
+        setFormData(prev => ({ 
+            ...prev, 
+            [name]: value 
+        }));
+        console.log(`字段 ${name} 更新为:`, value); // 调试日志
+    };
+
+    const handleTagsChange = (e) => {
+        const tagsString = e.target.value;
+        const tagsArray = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
+        setFormData(prev => ({ 
+            ...prev, 
+            tags: tagsArray 
+        }));
+        console.log('标签更新为:', tagsArray); // 调试日志
     };
 
     return (
@@ -75,9 +87,6 @@ const BroadcastForm = ({ onClose }) => {
                         placeholder="请输入广播标题"
                         maxLength={100}
                     />
-                    <div className={styles.charCount}>
-                        {formData.title.length}/100
-                    </div>
                 </div>
 
                 <div className={styles.formGroup}>
@@ -91,18 +100,15 @@ const BroadcastForm = ({ onClose }) => {
                         rows="5"
                         maxLength={1000}
                     />
-                    <div className={styles.charCount}>
-                        {formData.content.length}/1000
-                    </div>
                 </div>
 
                 <div className={styles.formRow}>
                     <div className={styles.formGroup}>
-                        <label htmlFor="type">类型</label>
+                        <label htmlFor="broadcast_type">类型</label>
                         <select
-                            id="type"
-                            name="type"
-                            value={formData.type}
+                            id="broadcast_type"
+                            name="broadcast_type"
+                            value={formData.broadcast_type}
                             onChange={handleChange}
                         >
                             <option value="general">一般通知</option>
@@ -133,10 +139,9 @@ const BroadcastForm = ({ onClose }) => {
                     <input
                         type="text"
                         id="tags"
-                        name="tags"
-                        value={formData.tags}
-                        onChange={handleChange}
-                        placeholder="用逗号分隔标签"
+                        name="tags_input"
+                        onChange={handleTagsChange}
+                        placeholder="用逗号分隔标签（例如：新闻,更新,重要）"
                     />
                 </div>
 
@@ -145,6 +150,7 @@ const BroadcastForm = ({ onClose }) => {
                         type="button"
                         onClick={onClose}
                         className={styles.cancelButton}
+                        disabled={isSubmitting}
                     >
                         取消
                     </button>

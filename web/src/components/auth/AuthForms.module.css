@@ -1,0 +1,110 @@
+.authForm {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.authForm h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2575fc;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #f0f0f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #2575fc;
+}
+
+.submitButton {
+  width: 100%;
+  background: #2575fc;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-bottom: 15px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #1a68e8;
+}
+
+.submitButton:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.error {
+  background: #ffeaea;
+  color: #ff4757;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.switchAuth {
+  text-align: center;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.switchButton {
+  background: none;
+  border: none;
+  color: #2575fc;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+.switchButton:hover {
+  color: #1a68e8;
+}
+
+.demoSection {
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.demoButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.demoButton:hover {
+  background: #218838;
+}

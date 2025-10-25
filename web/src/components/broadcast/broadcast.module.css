@@ -62,3 +62,22 @@
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
+/* 在现有样式基础上添加 */
+.authRequired {
+  text-align: center;
+  padding: 40px;
+}
+
+.authRequired h3 {
+  color: #2575fc;
+  margin-bottom: 20px;
+}
+
+.errorMessage {
+  background: #ffeaea;
+  color: #ff4757;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #ff4757;
+}

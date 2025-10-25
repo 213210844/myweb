@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import json
 
 class Broadcast(models.Model):
     PRIORITY_CHOICES = [
@@ -21,7 +22,7 @@ class Broadcast(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='作者')
     broadcast_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='general', verbose_name='类型')
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium', verbose_name='优先级')
-    tags = models.JSONField(default=list, blank=True, verbose_name='标签')
+    tags = models.TextField(default='[]', verbose_name='标签')
     is_published = models.BooleanField(default=True, verbose_name='是否发布')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
@@ -38,6 +39,17 @@ class Broadcast(models.Model):
     
     def __str__(self):
         return self.title
+    
+    def get_tags(self):
+        """获取标签列表"""
+        try:
+            return json.loads(self.tags)
+        except:
+            return []
+    
+    def set_tags(self, tags_list):
+        """设置标签列表"""
+        self.tags = json.dumps(tags_list)
 
 class BroadcastLike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')
@@ -70,6 +82,7 @@ class UserBroadcastView(models.Model):
         unique_together = ['user', 'broadcast']
         verbose_name = '用户浏览记录'
         verbose_name_plural = '用户浏览记录'
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='用户')
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name='头像')
