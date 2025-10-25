@@ -51,17 +51,4 @@ export const mockBroadcasts = [
         views: 420,
         tags: ['安全', '更新']
     },
-    {
-        id: '5',
-        title: 'life style',
-        content: 'dsafsdfsdfsefsdfsdfsdffdsd。',
-        type: 'security',
-        author: 'sdfsfsdc',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6小时前
-        priority: 'high',
-        likes: 8,
-        comments: 3,
-        views: 420,
-        tags: ['hiphop', 'update']
-    },
 ];
