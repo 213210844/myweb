@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@u7-kk-h%-c#_ux)2ni@f&mem+l-b+ncvgbqzxfsle9tkv(2-o'
+SECRET_KEY = 'django-insecure-a%!1yk!!!sqnd4h53^)7soyvhijrwc0i&-q%mkck88dafnp0ls'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,11 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'database',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -101,22 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# CORS 配置
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-CORS_ALLOW_ALL_ORIGINS = True  # 开发环境
-CORS_ALLOW_CREDENTIALS = True
-# REST Framework 配置
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ]
-}
 
-# 指定自定义用户模型
-AUTH_USER_MODEL = 'database.User'
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
