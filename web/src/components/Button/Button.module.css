@@ -1,0 +1,29 @@
+.btn {
+    background: #2575fc;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+    display: inline-block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background: #1a68e8;
+    transform: scale(1.05);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
